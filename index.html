@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>ProteinFlip</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #1a1a2e;
+      --bg-secondary: #16213e;
+      --text: #eaeaea;
+      --text-muted: #888;
+      --accent: #e94560;
+      --accent-green: #4ecca3;
+      --accent-orange: #ff9f43;
+      --card-bg: #16213e;
+      --border: #2a2a4a;
+    }
+
+    .light-mode {
+      --bg: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #666;
+      --card-bg: #ffffff;
+      --border: #ddd;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    .app {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .nav-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Split Flap Counter */
+    .counter-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .split-flap-counter {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .flip-digit {
+      width: 50px;
+      height: 70px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .flip-digit-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+
+    .flip-digit::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .unit-label {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Progress Ring */
+    .progress-section {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .progress-ring-container {
+      position: relative;
+      width: 160px;
+      height: 160px;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 10;
+    }
+
+    .progress-ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.3s;
+    }
+
+    .progress-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-percent {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .progress-goal {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Quick Add Buttons */
+    .quick-add {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .quick-btn {
+      flex: 1;
+      padding: 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .quick-btn:active {
+      transform: scale(0.95);
+      background: var(--accent);
+    }
+
+    /* Slider Section */
+    .slider-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .slider-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .slider {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border);
+      border-radius: 4px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .add-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .add-btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    /* Undo Button */
+    .undo-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .undo-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .undo-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* History View */
+    .month-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .month-nav h2 {
+      font-size: 1.2rem;
+    }
+
+    .month-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .calendar-header {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      padding: 8px 0;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-bg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: transform 0.1s;
+      border: 2px solid transparent;
+    }
+
+    .calendar-day:empty {
+      background: transparent;
+      cursor: default;
+    }
+
+    .calendar-day.has-data {
+      border-color: var(--accent);
+    }
+
+    .calendar-day.goal-met {
+      border-color: var(--accent-green);
+    }
+
+    .calendar-day.goal-close {
+      border-color: var(--accent-orange);
+    }
+
+    .calendar-day.today {
+      background: var(--accent);
+      color: white;
+    }
+
+    .calendar-day:active:not(:empty) {
+      transform: scale(0.95);
+    }
+
+    .day-num {
+      font-weight: 600;
+    }
+
+    .day-grams {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .calendar-day.today .day-grams {
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Goals View */
+    .goals-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .goals-section h3 {
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    .goal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .goal-stepper {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .stepper-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .stepper-btn:active {
+      background: var(--accent);
+    }
+
+    .goal-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .weight-calc {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .weight-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .weight-input {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .unit-toggle {
+      display: flex;
+      background: var(--bg);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .unit-btn {
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .unit-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .calc-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-green);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .modal h3 {
+      margin-bottom: 20px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1.2rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-btn.cancel {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .modal-btn.confirm {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Hidden iOS haptic trigger */
+    .ios-haptic-trigger {
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Data management section */
+    .data-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .data-section h3 {
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    .data-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .data-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .data-btn:active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .storage-status {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .storage-status.protected {
+      color: var(--accent-green);
+    }
+  </style>
+</head>
+<body>
+  <!-- iOS 18+ Haptic Trigger (hidden) -->
+  <input type="checkbox" switch id="ios-haptic" class="ios-haptic-trigger">
+  <label for="ios-haptic" id="ios-haptic-label" class="ios-haptic-trigger"></label>
+  <div class="app">
+    <!-- Home View -->
+    <div id="home-view" class="view active">
+      <div class="header">
+        <h1>ProteinFlip</h1>
+        <div class="nav-buttons">
+          <button class="nav-btn" id="history-btn" title="History">&#128197;</button>
+          <button class="nav-btn" id="goals-btn" title="Goals">&#127919;</button>
+          <button class="nav-btn" id="theme-btn" title="Toggle theme">&#9790;</button>
+        </div>
+      </div>
+
+      <div class="counter-section">
+        <div class="split-flap-counter" id="counter"></div>
+        <div class="unit-label">grams of protein today</div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="160" height="160">
+            <circle class="progress-ring-bg" cx="80" cy="80" r="70"></circle>
+            <circle class="progress-ring-fill" id="progress-fill" cx="80" cy="80" r="70"
+                    stroke-dasharray="439.8" stroke-dashoffset="439.8"></circle>
+          </svg>
+          <div class="progress-text">
+            <div class="progress-percent" id="progress-percent">0%</div>
+            <div class="progress-goal" id="progress-goal">Goal: 0g</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-add">
+        <button class="quick-btn" data-amount="20">+20g</button>
+        <button class="quick-btn" data-amount="40">+40g</button>
+        <button class="quick-btn" data-amount="50">+50g</button>
+      </div>
+
+      <div class="slider-section">
+        <div class="slider-header">
+          <span>Custom amount</span>
+          <span class="slider-value" id="slider-value">25g</span>
+        </div>
+        <input type="range" class="slider" id="amount-slider" min="1" max="150" value="25">
+        <button class="add-btn" id="add-btn">Add Protein</button>
+      </div>
+
+      <div class="undo-section">
+        <button class="undo-btn" id="undo-btn" disabled>Undo last add</button>
+      </div>
+    </div>
+
+    <!-- History View -->
+    <div id="history-view" class="view">
+      <div class="header">
+        <button class="nav-btn" id="back-from-history">&#8592;</button>
+        <h1>History</h1>
+        <div style="width:40px"></div>
+      </div>
+
+      <div class="month-nav">
+        <button class="month-btn" id="prev-month">&#8249;</button>
+        <h2 id="month-label">January 2026</h2>
+        <button class="month-btn" id="next-month">&#8250;</button>
+      </div>
+
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+
+    <!-- Goals View -->
+    <div id="goals-view" class="view">
+      <div class="header">
+        <button class="nav-btn" id="back-from-goals">&#8592;</button>
+        <h1>Goals</h1>
+        <div style="width:40px"></div>
+      </div>
+
+      <div class="goals-section">
+        <h3>Daily Protein Goal</h3>
+        <div class="goal-input-row">
+          <div class="goal-stepper">
+            <button class="stepper-btn" id="goal-minus">-</button>
+            <span class="goal-value" id="goal-display">150g</span>
+            <button class="stepper-btn" id="goal-plus">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="goals-section">
+        <h3>Calculate from Body Weight</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
+          Recommended: 1.7g protein per kg body weight
+        </p>
+        <div class="weight-row">
+          <input type="number" class="weight-input" id="weight-input" placeholder="Your weight">
+          <div class="unit-toggle">
+            <button class="unit-btn active" data-unit="kg">kg</button>
+            <button class="unit-btn" data-unit="lb">lb</button>
+          </div>
+        </div>
+        <button class="calc-btn" id="calc-btn">Calculate Goal</button>
+      </div>
+
+      <div class="data-section">
+        <h3>Your Data</h3>
+        <div class="data-buttons">
+          <button class="data-btn" id="export-btn">Export Backup</button>
+          <button class="data-btn" id="import-btn">Import Backup</button>
+        </div>
+        <input type="file" id="import-file" accept=".json" style="display:none">
+        <div class="storage-status" id="storage-status">Checking storage...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <h3 id="modal-title">Edit Entry</h3>
+      <input type="number" class="modal-input" id="modal-input" placeholder="0">
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" id="modal-cancel">Cancel</button>
+        <button class="modal-btn confirm" id="modal-confirm">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== State Management =====
+    const STORAGE_KEY = 'proteinflip_data';
+    const GOAL_KEY = 'proteinflip_goal';
+
+    let state = {
+      todayGrams: 0,
+      goalGrams: 150,
+      log: {},
+      lastAdd: null,
+      displayValue: 0
+    };
+
+    function getTodayKey() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          state.log = JSON.parse(saved);
+        }
+        const goal = localStorage.getItem(GOAL_KEY);
+        if (goal) {
+          state.goalGrams = parseInt(goal, 10);
+        }
+        state.todayGrams = state.log[getTodayKey()] || 0;
+        state.displayValue = state.todayGrams;
+      } catch (e) {
+        console.error('Failed to load state:', e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.log));
+        localStorage.setItem(GOAL_KEY, state.goalGrams.toString());
+      } catch (e) {
+        console.error('Failed to save state:', e);
+      }
+    }
+
+    // ===== Haptics (Cross-platform) =====
+    // iOS 18+ workaround: Uses hidden checkbox switch that triggers haptic when toggled
+    // Android/others: Uses Vibration API
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const iosHapticLabel = document.getElementById('ios-haptic-label');
+    const iosHapticInput = document.getElementById('ios-haptic');
+
+    function triggerIOSHaptic() {
+      // Toggle the hidden switch via its label to trigger iOS haptic
+      if (iosHapticLabel) {
+        iosHapticLabel.click();
+      }
+    }
+
+    function vibrate(pattern) {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(pattern);
+      }
+    }
+
+    function hapticTap() {
+      if (isIOS) {
+        triggerIOSHaptic();
+      } else {
+        vibrate(10);
+      }
+    }
+
+    function hapticSuccess() {
+      if (isIOS) {
+        // Multiple taps for success feel
+        triggerIOSHaptic();
+        setTimeout(triggerIOSHaptic, 100);
+      } else {
+        vibrate([10, 50, 10]);
+      }
+    }
+
+    function hapticTick() {
+      if (isIOS) {
+        triggerIOSHaptic();
+      } else {
+        vibrate(5);
+      }
+    }
+
+    // ===== Counter Animation =====
+    function updateCounter(targetValue, animate = true) {
+      const counter = document.getElementById('counter');
+      const digits = String(targetValue).padStart(4, '0').split('');
+
+      if (!animate || state.displayValue === targetValue) {
+        counter.innerHTML = digits.map(d => `
+          <div class="flip-digit">
+            <div class="flip-digit-value">${d}</div>
+          </div>
+        `).join('');
+        state.displayValue = targetValue;
+        return;
+      }
+
+      const startValue = state.displayValue;
+      const diff = targetValue - startValue;
+      const steps = Math.min(Math.abs(diff), 30);
+      const stepSize = diff / steps;
+      let currentStep = 0;
+
+      function tick() {
+        currentStep++;
+        const newValue = Math.round(startValue + (stepSize * currentStep));
+        state.displayValue = newValue;
+
+        const displayDigits = String(Math.max(0, newValue)).padStart(4, '0').split('');
+        counter.innerHTML = displayDigits.map(d => `
+          <div class="flip-digit">
+            <div class="flip-digit-value">${d}</div>
+          </div>
+        `).join('');
+
+        hapticTick();
+
+        if (currentStep < steps) {
+          setTimeout(tick, 40);
+        } else {
+          state.displayValue = targetValue;
+          const finalDigits = String(targetValue).padStart(4, '0').split('');
+          counter.innerHTML = finalDigits.map(d => `
+            <div class="flip-digit">
+              <div class="flip-digit-value">${d}</div>
+            </div>
+          `).join('');
+          hapticSuccess();
+        }
+      }
+
+      tick();
+    }
+
+    // ===== Progress Ring =====
+    function updateProgress() {
+      const fill = document.getElementById('progress-fill');
+      const percentEl = document.getElementById('progress-percent');
+      const goalEl = document.getElementById('progress-goal');
+
+      const circumference = 2 * Math.PI * 70; // r=70
+      let percent = 0;
+
+      if (state.goalGrams > 0) {
+        percent = Math.min((state.todayGrams / state.goalGrams) * 100, 100);
+      }
+
+      const offset = circumference - (percent / 100) * circumference;
+      fill.style.strokeDashoffset = offset;
+
+      // Color based on progress
+      if (percent >= 100) {
+        fill.style.stroke = 'var(--accent-green)';
+      } else if (percent >= 60) {
+        fill.style.stroke = 'var(--accent-orange)';
+      } else {
+        fill.style.stroke = 'var(--accent)';
+      }
+
+      percentEl.textContent = Math.round(percent) + '%';
+      goalEl.textContent = `Goal: ${state.goalGrams}g`;
+    }
+
+    // ===== Add Protein =====
+    function addProtein(amount) {
+      hapticTap();
+
+      state.lastAdd = amount;
+      state.todayGrams += amount;
+      state.log[getTodayKey()] = state.todayGrams;
+
+      saveState();
+      updateCounter(state.todayGrams);
+      updateProgress();
+      updateUndoButton();
+    }
+
+    function undoLastAdd() {
+      if (state.lastAdd === null) return;
+
+      hapticTap();
+      state.todayGrams = Math.max(0, state.todayGrams - state.lastAdd);
+      state.log[getTodayKey()] = state.todayGrams;
+      state.lastAdd = null;
+
+      saveState();
+      updateCounter(state.todayGrams);
+      updateProgress();
+      updateUndoButton();
+    }
+
+    function updateUndoButton() {
+      const btn = document.getElementById('undo-btn');
+      btn.disabled = state.lastAdd === null;
+    }
+
+    // ===== Slider =====
+    function initSlider() {
+      const slider = document.getElementById('amount-slider');
+      const display = document.getElementById('slider-value');
+
+      slider.addEventListener('input', () => {
+        display.textContent = slider.value + 'g';
+      });
+    }
+
+    // ===== Navigation =====
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+
+      if (viewId === 'history-view') {
+        renderCalendar();
+      } else if (viewId === 'goals-view') {
+        updateGoalDisplay();
+      }
+    }
+
+    // ===== Theme =====
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('proteinflip_theme', isLight ? 'light' : 'dark');
+      document.getElementById('theme-btn').innerHTML = isLight ? '&#9788;' : '&#9790;';
+    }
+
+    function loadTheme() {
+      const theme = localStorage.getItem('proteinflip_theme');
+      if (theme === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('theme-btn').innerHTML = '&#9788;';
+      }
+    }
+
+    // ===== Calendar =====
+    let currentMonth = new Date();
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      const label = document.getElementById('month-label');
+
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+
+      label.textContent = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startPad = firstDay.getDay();
+
+      const today = getTodayKey();
+
+      let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        .map(d => `<div class="calendar-header">${d}</div>`)
+        .join('');
+
+      // Empty cells for padding
+      for (let i = 0; i < startPad; i++) {
+        html += '<div class="calendar-day"></div>';
+      }
+
+      // Day cells
+      for (let day = 1; day <= lastDay.getDate(); day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const grams = state.log[dateKey] || 0;
+        const isToday = dateKey === today;
+
+        let classes = 'calendar-day';
+        if (isToday) classes += ' today';
+        if (grams > 0) {
+          classes += ' has-data';
+          if (state.goalGrams > 0) {
+            const pct = grams / state.goalGrams;
+            if (pct >= 1) classes += ' goal-met';
+            else if (pct >= 0.6) classes += ' goal-close';
+          }
+        }
+
+        html += `
+          <div class="${classes}" data-date="${dateKey}">
+            <span class="day-num">${day}</span>
+            ${grams > 0 ? `<span class="day-grams">${grams}g</span>` : ''}
+          </div>
+        `;
+      }
+
+      grid.innerHTML = html;
+
+      // Add click handlers
+      grid.querySelectorAll('.calendar-day[data-date]').forEach(cell => {
+        cell.addEventListener('click', () => {
+          const date = cell.dataset.date;
+          const current = state.log[date] || 0;
+          openEditModal(date, current);
+        });
+      });
+    }
+
+    function changeMonth(delta) {
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
+      renderCalendar();
+    }
+
+    // ===== Goals =====
+    function updateGoalDisplay() {
+      document.getElementById('goal-display').textContent = state.goalGrams + 'g';
+    }
+
+    function adjustGoal(delta) {
+      hapticTap();
+      state.goalGrams = Math.max(40, Math.min(300, state.goalGrams + delta));
+      saveState();
+      updateGoalDisplay();
+      updateProgress();
+    }
+
+    function calculateFromWeight() {
+      const input = document.getElementById('weight-input');
+      const weight = parseFloat(input.value);
+
+      if (isNaN(weight) || weight <= 0) return;
+
+      const isKg = document.querySelector('.unit-btn.active').dataset.unit === 'kg';
+      const kg = isKg ? weight : weight * 0.45359237;
+      const goal = Math.round(kg * 1.7);
+
+      hapticSuccess();
+      state.goalGrams = Math.max(40, Math.min(300, goal));
+      saveState();
+      updateGoalDisplay();
+      updateProgress();
+    }
+
+    // ===== Edit Modal =====
+    let editingDate = null;
+
+    function openEditModal(date, current) {
+      hapticTap();
+      editingDate = date;
+
+      const dateObj = new Date(date + 'T00:00:00');
+      document.getElementById('modal-title').textContent =
+        'Edit ' + dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      document.getElementById('modal-input').value = current;
+      document.getElementById('edit-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('active');
+      editingDate = null;
+    }
+
+    function saveEdit() {
+      const value = parseInt(document.getElementById('modal-input').value, 10);
+
+      if (isNaN(value) || value < 0) {
+        closeEditModal();
+        return;
+      }
+
+      hapticSuccess();
+
+      if (value === 0) {
+        delete state.log[editingDate];
+      } else {
+        state.log[editingDate] = value;
+      }
+
+      // Update today if editing today
+      if (editingDate === getTodayKey()) {
+        state.todayGrams = value;
+        updateCounter(state.todayGrams, false);
+        updateProgress();
+      }
+
+      saveState();
+      renderCalendar();
+      closeEditModal();
+    }
+
+    // ===== Persistent Storage =====
+    async function requestPersistentStorage() {
+      const statusEl = document.getElementById('storage-status');
+
+      if (navigator.storage && navigator.storage.persist) {
+        const isPersisted = await navigator.storage.persisted();
+
+        if (isPersisted) {
+          statusEl.textContent = 'Storage is protected from automatic clearing';
+          statusEl.classList.add('protected');
+          return;
+        }
+
+        const granted = await navigator.storage.persist();
+        if (granted) {
+          statusEl.textContent = 'Storage is protected from automatic clearing';
+          statusEl.classList.add('protected');
+        } else {
+          statusEl.textContent = 'Storage may be cleared by browser. Use backups.';
+        }
+      } else {
+        statusEl.textContent = 'Use backups to protect your data.';
+      }
+    }
+
+    // ===== Export/Import =====
+    function exportData() {
+      hapticTap();
+
+      const data = {
+        version: 1,
+        exportDate: new Date().toISOString(),
+        log: state.log,
+        goalGrams: state.goalGrams,
+        theme: localStorage.getItem('proteinflip_theme') || 'dark'
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `proteinflip-backup-${getTodayKey()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      hapticSuccess();
+    }
+
+    function importData(file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+
+          if (!data.log || typeof data.log !== 'object') {
+            alert('Invalid backup file');
+            return;
+          }
+
+          // Merge or replace data
+          state.log = data.log;
+          state.goalGrams = data.goalGrams || 150;
+          state.todayGrams = state.log[getTodayKey()] || 0;
+
+          if (data.theme) {
+            localStorage.setItem('proteinflip_theme', data.theme);
+            if (data.theme === 'light') {
+              document.body.classList.add('light-mode');
+            } else {
+              document.body.classList.remove('light-mode');
+            }
+          }
+
+          saveState();
+          updateCounter(state.todayGrams, false);
+          updateProgress();
+          updateGoalDisplay();
+
+          hapticSuccess();
+          alert('Data restored successfully!');
+        } catch (err) {
+          alert('Failed to read backup file');
+          console.error(err);
+        }
+      };
+
+      reader.readAsText(file);
+    }
+
+    // ===== Init =====
+    function init() {
+      loadState();
+      loadTheme();
+      initSlider();
+      updateCounter(state.todayGrams, false);
+      updateProgress();
+      updateUndoButton();
+      requestPersistentStorage();
+
+      // Quick add buttons
+      document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          addProtein(parseInt(btn.dataset.amount, 10));
+        });
+      });
+
+      // Add button
+      document.getElementById('add-btn').addEventListener('click', () => {
+        const amount = parseInt(document.getElementById('amount-slider').value, 10);
+        addProtein(amount);
+      });
+
+      // Undo
+      document.getElementById('undo-btn').addEventListener('click', undoLastAdd);
+
+      // Navigation
+      document.getElementById('history-btn').addEventListener('click', () => showView('history-view'));
+      document.getElementById('goals-btn').addEventListener('click', () => showView('goals-view'));
+      document.getElementById('back-from-history').addEventListener('click', () => showView('home-view'));
+      document.getElementById('back-from-goals').addEventListener('click', () => showView('home-view'));
+
+      // Theme
+      document.getElementById('theme-btn').addEventListener('click', toggleTheme);
+
+      // Calendar navigation
+      document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
+      document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
+
+      // Goals
+      document.getElementById('goal-minus').addEventListener('click', () => adjustGoal(-10));
+      document.getElementById('goal-plus').addEventListener('click', () => adjustGoal(10));
+      document.getElementById('calc-btn').addEventListener('click', calculateFromWeight);
+
+      // Unit toggle
+      document.querySelectorAll('.unit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+
+      // Modal
+      document.getElementById('modal-cancel').addEventListener('click', closeEditModal);
+      document.getElementById('modal-confirm').addEventListener('click', saveEdit);
+      document.getElementById('edit-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'edit-modal') closeEditModal();
+      });
+
+      // Export/Import
+      document.getElementById('export-btn').addEventListener('click', exportData);
+      document.getElementById('import-btn').addEventListener('click', () => {
+        document.getElementById('import-file').click();
+      });
+      document.getElementById('import-file').addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          importData(e.target.files[0]);
+          e.target.value = ''; // Reset for future imports
+        }
+      });
+
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
