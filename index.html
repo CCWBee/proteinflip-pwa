@@ -622,6 +622,39 @@
     .storage-status.protected {
       color: var(--accent-green);
     }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      text-align: center;
+      max-width: 300px;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.error {
+      border-color: var(--accent);
+    }
+
+    .toast.success {
+      border-color: var(--accent-green);
+    }
   </style>
 </head>
 <body>
@@ -754,6 +787,9 @@
     </div>
   </div>
 
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
   <script>
     // ===== State Management =====
     const STORAGE_KEY = 'proteinflip_data';
@@ -844,6 +880,15 @@
       }
     }
 
+    // ===== Toast Notifications =====
+    function showToast(message, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
     // ===== Counter Animation =====
     function updateCounter(targetValue, animate = true) {
       const counter = document.getElementById('counter');
@@ -929,9 +974,13 @@
     function addProtein(amount) {
       hapticTap();
 
+      const todayKey = getTodayKey();
+      // Sync with actual today (handles midnight rollover)
+      state.todayGrams = state.log[todayKey] || 0;
+
       state.lastAdd = amount;
       state.todayGrams += amount;
-      state.log[getTodayKey()] = state.todayGrams;
+      state.log[todayKey] = state.todayGrams;
 
       saveState();
       updateCounter(state.todayGrams);
@@ -943,8 +992,10 @@
       if (state.lastAdd === null) return;
 
       hapticTap();
+      const todayKey = getTodayKey();
+      state.todayGrams = state.log[todayKey] || 0;
       state.todayGrams = Math.max(0, state.todayGrams - state.lastAdd);
-      state.log[getTodayKey()] = state.todayGrams;
+      state.log[todayKey] = state.todayGrams;
       state.lastAdd = null;
 
       saveState();
@@ -965,6 +1016,7 @@
 
       slider.addEventListener('input', () => {
         display.textContent = slider.value + 'g';
+        hapticTick();
       });
     }
 
@@ -1010,11 +1062,11 @@
 
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
-      const startPad = firstDay.getDay();
+      const startPad = (firstDay.getDay() + 6) % 7; // Monday-first
 
       const today = getTodayKey();
 
-      let html = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      let html = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         .map(d => `<div class="calendar-header">${d}</div>`)
         .join('');
 
@@ -1201,7 +1253,7 @@
           const data = JSON.parse(e.target.result);
 
           if (!data.log || typeof data.log !== 'object') {
-            alert('Invalid backup file');
+            showToast('Invalid backup file', 'error');
             return;
           }
 
@@ -1225,9 +1277,9 @@
           updateGoalDisplay();
 
           hapticSuccess();
-          alert('Data restored successfully!');
+          showToast('Data restored!', 'success');
         } catch (err) {
-          alert('Failed to read backup file');
+          showToast('Failed to read backup file', 'error');
           console.error(err);
         }
       };
@@ -1290,6 +1342,9 @@
       // Modal
       document.getElementById('modal-cancel').addEventListener('click', closeEditModal);
       document.getElementById('modal-confirm').addEventListener('click', saveEdit);
+      document.getElementById('modal-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveEdit();
+      });
       document.getElementById('edit-modal').addEventListener('click', (e) => {
         if (e.target.id === 'edit-modal') closeEditModal();
       });

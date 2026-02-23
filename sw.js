@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proteinflip-v1';
+const CACHE_NAME = 'proteinflip-v2';
 
 // Use relative paths for GitHub Pages compatibility
 const ASSETS = [
